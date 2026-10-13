@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
+<path fill="#ffdd00" d="M0,120 V66 C58,42 118,74 188,58 C248,44 298,72 368,60 C428,50 470,26 540,40 C610,54 652,76 722,62 C792,48 832,30 902,44 C972,58 1012,74 1082,60 C1152,46 1202,68 1272,56 C1342,44 1392,64 1440,50 V120 Z"/>
+<path fill="#ffdd00" opacity=".45" d="M0,120 V84 C70,66 130,92 210,78 C286,65 330,90 410,80 C486,71 520,52 600,64 C680,76 716,94 800,82 C884,70 918,54 1000,66 C1082,78 1122,92 1200,80 C1288,66 1360,86 1440,72 V120 Z"/>
+<ellipse fill="#ffdd00" cx="252" cy="28" rx="7" ry="9"/>
+<ellipse fill="#ffdd00" cx="764" cy="22" rx="5" ry="7"/>
+<ellipse fill="#ffdd00" cx="1184" cy="30" rx="6" ry="8"/>
+<circle fill="#ffdd00" opacity=".6" cx="520" cy="20" r="4"/>
+<circle fill="#ffdd00" opacity=".6" cx="985" cy="26" r="3.5"/>
+</svg>

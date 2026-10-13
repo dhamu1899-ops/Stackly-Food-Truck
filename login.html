@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Stackly Food Truck</title>
+<meta name="description" content="Log in to your Stackly account to track orders, save favourites and manage catering bookings.">
+<link rel="icon" href="assets/img/logo.svg?v=2" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+
+<main class="auth-page">
+  <div class="auth-split">
+
+    <!-- Left: photo -->
+    <div class="auth-visual" aria-hidden="true">
+      <img class="auth-visual-img" src="assets/img/photos/hero-tacos.webp" alt="">
+      <div class="auth-visual-inner">
+        <span class="auth-brand auth-brand-light">
+          <img src="assets/img/logo.svg?v=2" alt=""><span>Stackly</span>
+        </span>
+        <div class="auth-tagline">
+          <p class="auth-tag-title">Tacos, burritos &amp; good times — rolled fresh in Salem since 2015.</p>
+          <p class="auth-tag-sub">Sign in to track your orders, save favourites and manage catering bookings.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: form -->
+    <div class="auth-panel">
+      <a class="auth-close" href="index.html" aria-label="Close and go back to home">
+        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z"/></svg>
+      </a>
+
+      <a class="auth-brand auth-brand-mobile" href="index.html">
+        <img src="assets/img/logo.svg?v=2" alt="Stackly logo"><span>Stackly</span>
+      </a>
+
+      <div class="auth-card">
+        <div class="auth-head">
+          <h1>Welcome Back</h1>
+          <p>Pick your role and sign in to continue.</p>
+        </div>
+
+        <div class="role-pills" role="group" aria-label="Account type">
+          <button type="button" class="role-pill active" data-role="user">Customer</button>
+          <button type="button" class="role-pill" data-role="admin">Admin</button>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <input class="form-control" type="email" name="email" placeholder="Email address" required>
+          </div>
+          <div class="form-group">
+            <input class="form-control" type="password" name="password" placeholder="Password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Sign In</button>
+          <p class="auth-err"></p>
+        </form>
+
+        <button type="button" class="forgot-link" id="forgotToggle">Forgot your password?</button>
+
+        <form id="forgotForm" class="forgot-box" novalidate>
+          <p class="forgot-title">Reset your password</p>
+          <div class="form-group">
+            <input class="form-control" type="email" name="forgot-email" placeholder="Enter your registered email" required>
+          </div>
+          <button type="submit" class="btn btn-outline-dark">Send Reset Link</button>
+          <p class="forgot-msg"></p>
+        </form>
+
+        <div class="auth-divider"><span>or sign in with</span></div>
+
+        <div class="social-login">
+          <button type="button" class="social-btn" data-provider="Google" aria-label="Sign in with Google">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z"/><path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.9-3c-1.1.7-2.4 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1C3.4 21.4 7.4 24 12 24z"/><path fill="#FBBC05" d="M5.4 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.6.4-2.4V6.5H1.4C.5 8.2 0 10 0 12s.5 3.8 1.4 5.5l4-3.1z"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4C17.9 1.1 15.2 0 12 0 7.4 0 3.4 2.6 1.4 6.5l4 3.1c.9-2.8 3.5-4.8 6.6-4.8z"/></svg>
+            Google
+          </button>
+          <button type="button" class="social-btn" data-provider="Facebook" aria-label="Sign in with Facebook">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#1877F2" d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.6 4.5-4.6 1.3 0 2.6.2 2.6.2v2.9h-1.5c-1.5 0-1.9.9-1.9 1.8V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0 0 24 12z"/></svg>
+            Facebook
+          </button>
+          <button type="button" class="social-btn" data-provider="X" aria-label="Sign in with X">
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+            X
+          </button>
+        </div>
+
+        <p class="auth-alt">New to Stackly? <a href="signup.html">Create an account</a></p>
+        <p class="auth-note">Demo admin login — email: <b>admin@stackly.com</b> · password: <b>admin123</b>. Or sign up as a customer to explore the user dashboard.</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="js/main.js?v=2"></script>
+<script src="js/auth.js?v=2"></script>
+</body>
+</html>

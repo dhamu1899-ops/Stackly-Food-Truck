@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard — Stackly Food Truck</title>
+<meta name="description" content="Your Stackly customer dashboard — orders, favourites, addresses and profile.">
+<link rel="icon" href="assets/img/logo.svg?v=2" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+
+<main data-guard="user" class="dash-shell">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="dash-side">
+    <a class="dash-brand" href="index.html">
+      <img src="assets/img/logo.svg?v=2" alt="Stackly logo">
+      <span>Stackly</span>
+    </a>
+
+    <p class="dash-side-label">My Account</p>
+    <nav class="dash-menu" aria-label="Dashboard">
+      <button type="button" class="active" data-dash="overview">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M3 3h8v8H3zm10 0h8v5h-8zM3 13h8v8H3zm10-3h8v11h-8z"/></svg> Overview
+      </button>
+      <button type="button" data-dash="orders">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M7 4h-2l-1 2H2v2h1.6l2.5 9.4A2 2 0 0 0 8 19h9v-2H8.4l-.3-1h9.3a2 2 0 0 0 1.9-1.4l2-6A2 2 0 0 0 19.4 8H7.2l-.4-2zM9 20a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg> My Orders
+      </button>
+      <button type="button" data-dash="favourites">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54z"/></svg> Favourites
+      </button>
+      <button type="button" data-dash="addresses">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg> Saved Addresses
+      </button>
+      <button type="button" data-dash="settings">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 .1-1 7.6 7.6 0 0 0-.1-1l2.1-1.7a.5.5 0 0 0 .1-.6l-2-3.5a.5.5 0 0 0-.6-.2l-2.5 1a7.7 7.7 0 0 0-1.7-1l-.4-2.6a.5.5 0 0 0-.5-.4h-4a.5.5 0 0 0-.5.4l-.4 2.6a7.7 7.7 0 0 0-1.7 1l-2.5-1a.5.5 0 0 0-.6.2l-2 3.5a.5.5 0 0 0 .1.6L4.5 11a7.6 7.6 0 0 0 0 2l-2.1 1.7a.5.5 0 0 0-.1.6l2 3.5c.1.2.4.3.6.2l2.5-1a7.7 7.7 0 0 0 1.7 1l.4 2.6c0 .2.2.4.5.4h4c.2 0 .5-.2.5-.4l.4-2.6a7.7 7.7 0 0 0 1.7-1l2.5 1c.2.1.5 0 .6-.2l2-3.5a.5.5 0 0 0-.1-.6zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg> Account Settings
+      </button>
+    </nav>
+
+    <p class="dash-side-label">Quick Links</p>
+    <nav class="dash-menu dash-menu-quick" aria-label="Quick links">
+      <a href="shop.html"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/></svg> Shop</a>
+      <a href="cart.html"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M7 4h-2l-1 2H2v2h1.6l2.5 9.4A2 2 0 0 0 8 19h9v-2H8.4l-.3-1h9.3a2 2 0 0 0 1.9-1.4l2-6A2 2 0 0 0 19.4 8H7.2l-.4-2z"/></svg> Cart</a>
+      <a href="index.html"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M12 3l9 8h-3v9h-4v-6h-4v6H6v-9H3z"/></svg> Back To Site</a>
+    </nav>
+
+    <button type="button" class="dash-logout" data-logout>
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M17 7l-1.4 1.4L18.2 11H8v2h10.2l-2.6 2.6L17 17l5-5zM6 17H3v-2h3v-2H3V5h9v2H6v2h6V5h2v10h-2v2h6v-2h-4v-2h4V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"/></svg> Log Out
+    </button>
+  </aside>
+
+  <!-- ===== Content ===== -->
+  <div class="dash-main">
+    <header class="dash-top">
+      <div>
+        <h1>Hey, <span data-user-name>friend</span>!</h1>
+        <p><span data-user-role>Customer</span> · <span data-user-email>you@example.com</span></p>
+      </div>
+      <a href="shop.html" class="btn btn-primary">Order Now</a>
+    </header>
+
+    <div class="dash-views">
+
+      <!-- Overview -->
+      <section class="dash-view active" data-dash-view="overview">
+        <div class="dash-grid">
+          <div class="dash-card"><span>Total Orders</span><b>12</b></div>
+          <div class="dash-card"><span>Reward Points</span><b>480</b></div>
+          <div class="dash-card"><span>Favourites</span><b>5</b></div>
+          <div class="dash-card"><span>Coupons</span><b>2</b></div>
+        </div>
+
+        <div class="dash-cols">
+          <div class="dash-panel">
+            <h2>Recent Orders</h2>
+            <table class="dash-table">
+              <thead>
+                <tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-label="Order">#STK-1042</td>
+                  <td data-label="Items">Birria Deluxe Box ×2</td>
+                  <td data-label="Total">₹700</td>
+                  <td data-label="Status"><span class="status">Delivered</span></td>
+                </tr>
+                <tr>
+                  <td data-label="Order">#STK-1038</td>
+                  <td data-label="Items">Fajitas Vegan Tray, Nachos</td>
+                  <td data-label="Total">₹370</td>
+                  <td data-label="Status"><span class="status">Delivered</span></td>
+                </tr>
+                <tr>
+                  <td data-label="Order">#STK-1031</td>
+                  <td data-label="Items">Garlic Prawn Tacos ×3</td>
+                  <td data-label="Total">₹1,260</td>
+                  <td data-label="Status"><span class="status pending">On the way</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="dash-panel">
+            <h2>Quick Links</h2>
+            <ul class="dash-list">
+              <li><a href="menu.html">Today's menu →</a></li>
+              <li><a href="shop.html">Browse the shop →</a></li>
+              <li><a href="locator.html">Find the truck →</a></li>
+              <li><a href="contact.html">Book catering →</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Orders -->
+      <section class="dash-view" data-dash-view="orders">
+        <div class="dash-panel">
+          <h2>My Orders</h2>
+          <table class="dash-table">
+            <thead>
+              <tr><th>Order</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="Order">#STK-1042</td>
+                <td data-label="Date">08 Oct 2026</td>
+                <td data-label="Items">Birria Deluxe Box ×2</td>
+                <td data-label="Total">₹700</td>
+                <td data-label="Status"><span class="status">Delivered</span></td>
+              </tr>
+              <tr>
+                <td data-label="Order">#STK-1038</td>
+                <td data-label="Date">04 Oct 2026</td>
+                <td data-label="Items">Fajitas Vegan Tray, Nachos</td>
+                <td data-label="Total">₹370</td>
+                <td data-label="Status"><span class="status">Delivered</span></td>
+              </tr>
+              <tr>
+                <td data-label="Order">#STK-1031</td>
+                <td data-label="Date">29 Sep 2026</td>
+                <td data-label="Items">Garlic Prawn Tacos ×3</td>
+                <td data-label="Total">₹1,260</td>
+                <td data-label="Status"><span class="status pending">On the way</span></td>
+              </tr>
+              <tr>
+                <td data-label="Order">#STK-1024</td>
+                <td data-label="Date">21 Sep 2026</td>
+                <td data-label="Items">Smokey Pulled Pork Combo</td>
+                <td data-label="Total">₹250</td>
+                <td data-label="Status"><span class="status">Delivered</span></td>
+              </tr>
+              <tr>
+                <td data-label="Order">#STK-1019</td>
+                <td data-label="Date">15 Sep 2026</td>
+                <td data-label="Items">Party Pack Burritos ×4</td>
+                <td data-label="Total">₹1,120</td>
+                <td data-label="Status"><span class="status">Delivered</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="dash-actions">
+            <a href="shop.html" class="btn btn-primary">Order Again</a>
+            <a href="cart.html" class="btn btn-outline-dark">View Cart</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Favourites -->
+      <section class="dash-view" data-dash-view="favourites">
+        <div class="dash-panel">
+          <h2>My Favourites</h2>
+          <div class="favs-grid">
+            <div class="product" data-id="p1" data-name="Birria Deluxe Box" data-price="350">
+              <div class="p-img">
+                <img src="assets/img/photos/product-1.webp" alt="Birria Deluxe Box">
+                <div class="p-overlay"><button class="add-cart"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M7 4h-2l-1 2H2v2h1.6l2.5 9.4A2 2 0 0 0 8 19h9v-2H8.4l-.3-1h9.3a2 2 0 0 0 1.9-1.4l2-6A2 2 0 0 0 19.4 8H7.2l-.4-2zM9 20a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg> Add to cart</button></div>
+              </div>
+              <div class="p-body">
+                <h3 class="p-title">Birria Deluxe Box</h3>
+                <div class="p-price">₹350</div>
+              </div>
+            </div>
+            <div class="product" data-id="p4" data-name="Garlic Prawn Tacos" data-price="420">
+              <div class="p-img">
+                <img src="assets/img/photos/product-4.webp" alt="Garlic Prawn Tacos">
+                <div class="p-overlay"><button class="add-cart"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M7 4h-2l-1 2H2v2h1.6l2.5 9.4A2 2 0 0 0 8 19h9v-2H8.4l-.3-1h9.3a2 2 0 0 0 1.9-1.4l2-6A2 2 0 0 0 19.4 8H7.2l-.4-2zM9 20a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg> Add to cart</button></div>
+              </div>
+              <div class="p-body">
+                <h3 class="p-title">Garlic Prawn Tacos</h3>
+                <div class="p-price">₹420</div>
+              </div>
+            </div>
+            <div class="product" data-id="p5" data-name="Fajitas Vegan Tray" data-price="370">
+              <div class="p-img">
+                <img src="assets/img/photos/product-5.webp" alt="Fajitas Vegan Tray">
+                <div class="p-overlay"><button class="add-cart"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M7 4h-2l-1 2H2v2h1.6l2.5 9.4A2 2 0 0 0 8 19h9v-2H8.4l-.3-1h9.3a2 2 0 0 0 1.9-1.4l2-6A2 2 0 0 0 19.4 8H7.2l-.4-2zM9 20a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg> Add to cart</button></div>
+              </div>
+              <div class="p-body">
+                <h3 class="p-title">Fajitas Vegan Tray</h3>
+                <div class="p-price">₹370</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Addresses -->
+      <section class="dash-view" data-dash-view="addresses">
+        <div class="dash-cols">
+          <div class="dash-panel">
+            <h2>Saved Addresses</h2>
+            <div class="addr-card">
+              <b>Home</b>
+              <p>14, 4th Cross Road, Fairlands, Salem – 636012</p>
+              <span class="status">Default</span>
+            </div>
+            <div class="addr-card">
+              <b>Office</b>
+              <p>2nd Floor, Surya Towers, Fort Main Road, Salem – 636001</p>
+              <span class="status pending">Work</span>
+            </div>
+          </div>
+          <div class="dash-panel">
+            <h2>Add New Address</h2>
+            <form id="addrForm" novalidate>
+              <div class="form-group">
+                <input class="form-control" type="text" name="label" placeholder="Label (Home / Office)" required>
+              </div>
+              <div class="form-group">
+                <input class="form-control" type="text" name="address" placeholder="Street, area, Salem" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Save Address</button>
+              <p class="auth-err"></p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section class="dash-view" data-dash-view="settings">
+        <div class="dash-cols">
+          <div class="dash-panel">
+            <h2>Profile Details</h2>
+            <form id="settingsForm" novalidate>
+              <div class="form-group">
+                <input class="form-control" type="text" name="name" placeholder="Full name" data-fill="name" required>
+              </div>
+              <div class="form-group">
+                <input class="form-control" type="email" name="email" placeholder="Email address" data-fill="email" required>
+              </div>
+              <div class="form-group">
+                <input class="form-control" type="tel" name="phone" placeholder="Phone number" value="+91 98765 43210">
+              </div>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+              <p class="auth-err"></p>
+            </form>
+          </div>
+          <div class="dash-panel">
+            <h2>Change Password</h2>
+            <form id="passwordForm" novalidate>
+              <div class="form-group">
+                <input class="form-control" type="password" name="current" placeholder="Current password" required>
+              </div>
+              <div class="form-group">
+                <input class="form-control" type="password" name="next" placeholder="New password (min 6 characters)" required>
+              </div>
+              <button type="submit" class="btn btn-outline-dark">Update Password</button>
+              <p class="auth-err"></p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+</main>
+
+<script src="js/main.js?v=2"></script>
+<script src="js/auth.js?v=2"></script>
+</body>
+</html>

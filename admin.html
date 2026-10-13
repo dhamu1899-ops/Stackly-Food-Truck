@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — Stackly Food Truck</title>
+<meta name="description" content="Stackly admin dashboard — manage orders, menu items and users.">
+<link rel="icon" href="assets/img/logo.svg?v=2" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+
+<main data-guard="admin" class="dash-shell">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="dash-side">
+    <a class="dash-brand" href="index.html">
+      <img src="assets/img/logo.svg?v=2" alt="Stackly logo">
+      <span>Stackly</span>
+    </a>
+
+    <p class="dash-side-label">Admin Panel</p>
+    <nav class="dash-menu" aria-label="Admin dashboard">
+      <button type="button" class="active" data-dash="overview">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M3 3h8v8H3zm10 0h8v5h-8zM3 13h8v8H3zm10-3h8v11h-8z"/></svg> Overview
+      </button>
+      <button type="button" data-dash="orders">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M7 4h-2l-1 2H2v2h1.6l2.5 9.4A2 2 0 0 0 8 19h9v-2H8.4l-.3-1h9.3a2 2 0 0 0 1.9-1.4l2-6A2 2 0 0 0 19.4 8H7.2l-.4-2zM9 20a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg> Orders
+      </button>
+      <button type="button" data-dash="users">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-8 1a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-2.7 0-8 1.3-8 4v3h10v-3c0-1 .4-1.9 1-2.6A14 14 0 0 0 8 14zm8 0c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg> Registered Users
+      </button>
+      <button type="button" data-dash="truck">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg> Truck Status
+      </button>
+      <button type="button" data-dash="info">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.4 4.2 2.5-.8 1.3L11 13V7h2z"/></svg> Site Info
+      </button>
+    </nav>
+
+    <p class="dash-side-label">Quick Links</p>
+    <nav class="dash-menu dash-menu-quick" aria-label="Quick links">
+      <a href="shop.html"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/></svg> Shop</a>
+      <a href="menu.html"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M8 2v7a3 3 0 0 0 2 2.8V22h2V11.8A3 3 0 0 0 14 9V2h-2v7h-1V2zm8 0c-1.1 0-2 .9-2 2v5h2V4h2V2z"/></svg> Menu</a>
+      <a href="index.html"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M12 3l9 8h-3v9h-4v-6h-4v6H6v-9H3z"/></svg> Back To Site</a>
+    </nav>
+
+    <button type="button" class="dash-logout" data-logout>
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M17 7l-1.4 1.4L18.2 11H8v2h10.2l-2.6 2.6L17 17l5-5zM6 17H3v-2h3v-2H3V5h9v2H6v2h6V5h2v10h-2v2h6v-2h-4v-2h4V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"/></svg> Log Out
+    </button>
+  </aside>
+
+  <!-- ===== Content ===== -->
+  <div class="dash-main">
+    <header class="dash-top">
+      <div>
+        <h1>Admin Panel — <span data-user-name>Admin</span></h1>
+        <p><span data-user-role>Administrator</span> · <span data-user-email>admin@stackly.com</span></p>
+      </div>
+      <a href="shop.html" class="btn btn-primary">Manage Products</a>
+    </header>
+
+    <div class="dash-views">
+
+      <!-- Overview -->
+      <section class="dash-view active" data-dash-view="overview">
+        <div class="dash-grid">
+          <div class="dash-card"><span>Today's Revenue</span><b>₹18,420</b></div>
+          <div class="dash-card"><span>Orders Today</span><b>64</b></div>
+          <div class="dash-card"><span>Menu Items</span><b>26</b></div>
+          <div class="dash-card"><span>Registered Users</span><b id="adminUserCount">1</b></div>
+        </div>
+
+        <div class="dash-cols">
+          <div class="dash-panel">
+            <h2>Recent Orders</h2>
+            <table class="dash-table">
+              <thead>
+                <tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-label="Order">#STK-1042</td>
+                  <td data-label="Customer">Divya S.</td>
+                  <td data-label="Total">₹700</td>
+                  <td data-label="Status"><span class="status">Delivered</span></td>
+                </tr>
+                <tr>
+                  <td data-label="Order">#STK-1041</td>
+                  <td data-label="Customer">Arun Prakash</td>
+                  <td data-label="Total">₹1,180</td>
+                  <td data-label="Status"><span class="status pending">Preparing</span></td>
+                </tr>
+                <tr>
+                  <td data-label="Order">#STK-1040</td>
+                  <td data-label="Customer">Fathima R.</td>
+                  <td data-label="Total">₹370</td>
+                  <td data-label="Status"><span class="status pending">On the way</span></td>
+                </tr>
+                <tr>
+                  <td data-label="Order">#STK-1039</td>
+                  <td data-label="Customer">Suresh Babu</td>
+                  <td data-label="Total">₹2,450</td>
+                  <td data-label="Status"><span class="status">Delivered</span></td>
+                </tr>
+                <tr>
+                  <td data-label="Order">#STK-1038</td>
+                  <td data-label="Customer">Meena K.</td>
+                  <td data-label="Total">₹540</td>
+                  <td data-label="Status"><span class="status">Delivered</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="dash-actions">
+              <a href="shop.html" class="btn btn-primary">Manage Products</a>
+              <a href="menu.html" class="btn btn-outline-dark">Edit Menu</a>
+            </div>
+          </div>
+
+          <div class="dash-panel">
+            <h2>Quick Actions</h2>
+            <ul class="dash-list">
+              <li><a href="shop.html">Manage products →</a></li>
+              <li><a href="menu.html">Edit today's menu →</a></li>
+              <li><a href="locator.html">Update truck stops →</a></li>
+              <li><a href="contact.html">Catering enquiries →</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Orders -->
+      <section class="dash-view" data-dash-view="orders">
+        <div class="dash-panel">
+          <h2>All Orders</h2>
+          <table class="dash-table">
+            <thead>
+              <tr><th>Order</th><th>Date</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="Order">#STK-1042</td>
+                <td data-label="Date">08 Oct 2026</td>
+                <td data-label="Customer">Divya S.</td>
+                <td data-label="Items">Birria Deluxe Box ×2</td>
+                <td data-label="Total">₹700</td>
+                <td data-label="Status"><span class="status">Delivered</span></td>
+              </tr>
+              <tr>
+                <td data-label="Order">#STK-1041</td>
+                <td data-label="Date">08 Oct 2026</td>
+                <td data-label="Customer">Arun Prakash</td>
+                <td data-label="Items">Party Pack Burritos ×3</td>
+                <td data-label="Total">₹1,180</td>
+                <td data-label="Status"><span class="status pending">Preparing</span></td>
+              </tr>
+              <tr>
+                <td data-label="Order">#STK-1040</td>
+                <td data-label="Date">07 Oct 2026</td>
+                <td data-label="Customer">Fathima R.</td>
+                <td data-label="Items">Fajitas Vegan Tray</td>
+                <td data-label="Total">₹370</td>
+                <td data-label="Status"><span class="status pending">On the way</span></td>
+              </tr>
+              <tr>
+                <td data-label="Order">#STK-1039</td>
+                <td data-label="Date">07 Oct 2026</td>
+                <td data-label="Customer">Suresh Babu</td>
+                <td data-label="Items">Catering Tray ×2, Nachos ×4</td>
+                <td data-label="Total">₹2,450</td>
+                <td data-label="Status"><span class="status">Delivered</span></td>
+              </tr>
+              <tr>
+                <td data-label="Order">#STK-1038</td>
+                <td data-label="Date">06 Oct 2026</td>
+                <td data-label="Customer">Meena K.</td>
+                <td data-label="Items">Garlic Prawn Tacos ×3</td>
+                <td data-label="Total">₹540</td>
+                <td data-label="Status"><span class="status">Delivered</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="dash-actions">
+            <a href="shop.html" class="btn btn-primary">Manage Products</a>
+            <a href="menu.html" class="btn btn-outline-dark">Edit Menu</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Registered Users -->
+      <section class="dash-view" data-dash-view="users">
+        <div class="dash-panel">
+          <h2>Registered Users</h2>
+          <ul class="dash-list" id="adminUserList">
+            <li><span>Admin</span><b class="status admin">Admin</b></li>
+          </ul>
+          <div class="dash-actions">
+            <a href="login.html" class="btn btn-outline-dark">Open Login Page</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Truck Status -->
+      <section class="dash-view" data-dash-view="truck">
+        <div class="dash-panel">
+          <h2>Truck Status</h2>
+          <ul class="dash-list">
+            <li><span>Ammapet stop</span><b class="status">Live now</b></li>
+            <li><span>Fairlands stop</span><b class="status pending">Opens 5pm</b></li>
+            <li><span>Yercaud Road</span><b class="status pending">Tomorrow</b></li>
+            <li><span>Catering van</span><b class="status">Available</b></li>
+          </ul>
+          <div class="dash-actions">
+            <a href="locator.html" class="btn btn-primary">Edit Truck Stops</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Site Info -->
+      <section class="dash-view" data-dash-view="info">
+        <div class="dash-panel">
+          <h2>About Stackly</h2>
+          <p>Stackly food truck rolled on to the streets of Salem in March, 2015. And with it, they took the city by storm with everyone's favorite comfort food: grilled cheese sandwiches, tacos — only not quite as innocent as mom used to make!</p>
+        </div>
+        <div class="dash-cols">
+          <div class="dash-panel">
+            <h2>Opening Hours</h2>
+            <ul class="hours hours-dark">
+              <li><span>Monday</span><b>8am-10pm</b></li>
+              <li><span>Tuesday</span><b>8am-10pm</b></li>
+              <li><span>Wednesday</span><b>8am-10pm</b></li>
+              <li><span>Thursday</span><b>8am-10pm</b></li>
+              <li><span>Friday</span><b>11am-12pm</b></li>
+              <li><span>Saturday</span><b>11am-12pm</b></li>
+              <li><span>Sunday</span><b>11am-12pm</b></li>
+            </ul>
+          </div>
+          <div class="dash-panel">
+            <h2>Connect With Us</h2>
+            <ul class="f-contact f-contact-dark">
+              <li><svg width="18" height="18" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14z"/></svg> Reservations: +91 427 234 5678</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-8 1a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-2.7 0-8 1.3-8 4v3h10v-3c0-1 .4-1.9 1-2.6A14 14 0 0 0 8 14zm8 0c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg> Catering: +91 427 234 5679</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/></svg> <a href="mailto:hello@stackly.com">hello@stackly.com</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+</main>
+
+<script src="js/main.js?v=2"></script>
+<script src="js/auth.js?v=2"></script>
+</body>
+</html>
