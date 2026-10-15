@@ -6,6 +6,170 @@
 
   var money = function (n) { return "₹" + Number(n).toLocaleString("en-IN"); };
 
+  /* ============================================================
+     Security helpers (fixes ITS-002 password storage and
+     ITS-003 session tampering)
+       · dependency-free SHA-256 + HMAC-SHA256 (synchronous)
+       · salted one-way password hashing — never store plaintext
+       · tamper-evident, expiring session records
+     NOTE: this is a static demo build; a production site must
+     additionally enforce credentials on a trusted server.
+     ============================================================ */
+  var SHA_K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+
+  var utf8Bytes = function (str) {
+    if (typeof TextEncoder !== "undefined") return new TextEncoder().encode(str);
+    var out = [], i;
+    for (i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length) {
+        var lo = str.charCodeAt(i + 1);
+        if (lo >= 0xdc00 && lo <= 0xdfff) { c = 0x10000 + ((c - 0xd800) << 10) + (lo - 0xdc00); i++; }
+      }
+      if (c < 0x80) out.push(c);
+      else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 63));
+      else if (c < 0x10000) out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+      else out.push(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+    }
+    return new Uint8Array(out);
+  };
+
+  var rotr32 = function (x, n) { return ((x >>> n) | (x << (32 - n))) >>> 0; };
+
+  var sha256Bytes = function (bytes) {
+    var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+    var l = bytes.length;
+    var total = (((l + 9 + 63) >> 6) << 6);
+    var buf = new Uint8Array(total);
+    buf.set(bytes);
+    buf[l] = 0x80;
+    var bitLo = (l * 8) >>> 0;
+    var bitHi = Math.floor((l * 8) / 4294967296);
+    buf[total - 8] = (bitHi >>> 24) & 255; buf[total - 7] = (bitHi >>> 16) & 255;
+    buf[total - 6] = (bitHi >>> 8) & 255;  buf[total - 5] = bitHi & 255;
+    buf[total - 4] = (bitLo >>> 24) & 255; buf[total - 3] = (bitLo >>> 16) & 255;
+    buf[total - 2] = (bitLo >>> 8) & 255;  buf[total - 1] = bitLo & 255;
+
+    var w = new Array(64);
+    var off, i;
+    for (off = 0; off < total; off += 64) {
+      for (i = 0; i < 16; i++) {
+        var j = off + i * 4;
+        w[i] = ((buf[j] << 24) | (buf[j + 1] << 16) | (buf[j + 2] << 8) | buf[j + 3]) >>> 0;
+      }
+      for (i = 16; i < 64; i++) {
+        var s0 = (rotr32(w[i - 15], 7) ^ rotr32(w[i - 15], 18) ^ (w[i - 15] >>> 3)) >>> 0;
+        var s1 = (rotr32(w[i - 2], 17) ^ rotr32(w[i - 2], 19) ^ (w[i - 2] >>> 10)) >>> 0;
+        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) >>> 0;
+      }
+      var a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (i = 0; i < 64; i++) {
+        var S1 = (rotr32(e, 6) ^ rotr32(e, 11) ^ rotr32(e, 25)) >>> 0;
+        var ch = ((e & f) ^ (~e & g)) >>> 0;
+        var t1 = (h + S1 + ch + SHA_K[i] + w[i]) >>> 0;
+        var S0 = (rotr32(a, 2) ^ rotr32(a, 13) ^ rotr32(a, 22)) >>> 0;
+        var maj = ((a & b) ^ (a & c) ^ (b & c)) >>> 0;
+        var t2 = (S0 + maj) >>> 0;
+        h = g; g = f; f = e; e = (d + t1) >>> 0;
+        d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+      }
+      H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0; H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+      H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0; H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+    }
+    return H;
+  };
+
+  var toHex = function (words) {
+    var hex = "", i;
+    for (i = 0; i < words.length; i++) hex += ("00000000" + words[i].toString(16)).slice(-8);
+    return hex;
+  };
+
+  var sha256hex = function (str) { return toHex(sha256Bytes(utf8Bytes(str))); };
+
+  var hmacHex = function (keyStr, msgStr) {
+    var key = utf8Bytes(keyStr);
+    if (key.length > 64) {
+      var kw = sha256Bytes(key), kb = new Uint8Array(32), ki;
+      for (ki = 0; ki < 32; ki++) kb[ki] = (kw[ki >>> 2] >>> (24 - (ki % 4) * 8)) & 255;
+      key = kb;
+    }
+    var ipad = new Uint8Array(64), opad = new Uint8Array(64), i;
+    for (i = 0; i < 64; i++) {
+      var b = i < key.length ? key[i] : 0;
+      ipad[i] = b ^ 0x36; opad[i] = b ^ 0x5c;
+    }
+    var msg = utf8Bytes(msgStr);
+    var stage1 = new Uint8Array(64 + msg.length);
+    stage1.set(ipad); stage1.set(msg, 64);
+    var ih = sha256Bytes(stage1);
+    var innerBytes = new Uint8Array(32);
+    for (i = 0; i < 32; i++) innerBytes[i] = (ih[i >>> 2] >>> (24 - (i % 4) * 8)) & 255;
+    var stage2 = new Uint8Array(64 + 32);
+    stage2.set(opad); stage2.set(innerBytes, 64);
+    return toHex(sha256Bytes(stage2));
+  };
+
+  /* Known-answer self-test — if the hash implementation is ever wrong,
+     auth fails closed instead of storing/comparing garbage. */
+  var SEC_OK =
+    sha256hex("") === "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" &&
+    sha256hex("abc") === "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+
+  var SESSION_KEY = "stackly_session";
+  var SESSION_SECRET = "stackly.demo.session.signing.v1"; /* demo build only */
+  var SESSION_TTL = 7 * 24 * 60 * 60 * 1000;             /* 7 days */
+
+  var signSession = function (s) {
+    return hmacHex(SESSION_SECRET, JSON.stringify([s.name, s.email, s.role, s.iat, s.exp]));
+  };
+
+  window.StacklySec = {
+    ok: SEC_OK,
+    sha256hex: sha256hex,
+    hmacHex: hmacHex,
+    hashPw: function (pw, salt) { return sha256hex(String(salt) + ":" + pw); },
+    randHex: function (n) {
+      var a = new Uint8Array(n || 16), i;
+      if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(a);
+      else for (i = 0; i < a.length; i++) a[i] = Math.floor(Math.random() * 256);
+      var hex = "";
+      for (i = 0; i < a.length; i++) hex += ("0" + a[i].toString(16)).slice(-2);
+      return hex;
+    },
+    /* build + sign + store a session */
+    set: function (s) {
+      if (!SEC_OK) return null;
+      var rec = { name: s.name, email: s.email, role: s.role, iat: Date.now(), exp: Date.now() + SESSION_TTL };
+      rec.sig = signSession(rec);
+      try { localStorage.setItem(SESSION_KEY, JSON.stringify(rec)); } catch (err) {}
+      return rec;
+    },
+    /* read + verify signature / expiry / role — destroy anything that fails */
+    get: function () {
+      if (!SEC_OK) return null;
+      try {
+        var s = JSON.parse(localStorage.getItem(SESSION_KEY));
+        if (!s || typeof s !== "object") return null;
+        var bad = !s.sig || typeof s.iat !== "number" || typeof s.exp !== "number" ||
+          Date.now() > s.exp || (s.role !== "user" && s.role !== "admin") ||
+          signSession(s) !== s.sig;
+        if (bad) { try { localStorage.removeItem(SESSION_KEY); } catch (err) {} return null; }
+        return s;
+      } catch (err) { return null; }
+    },
+    kill: function () { try { localStorage.removeItem(SESSION_KEY); } catch (err) {} }
+  };
+
   /* ---------- Mobile navigation ---------- */
   var navToggle = document.querySelector(".nav-toggle");
   var navList = document.querySelector(".main-nav > ul");
@@ -24,10 +188,9 @@
     });
   }
 
-  /* ---------- Login state in header ---------- */
-  var SESSION_KEY = "stackly_session";
+  /* ---------- Login state in header (signature-verified — ITS-003) ---------- */
   var getSession = function () {
-    try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch (err) { return null; }
+    try { return window.StacklySec ? window.StacklySec.get() : null; } catch (err) { return null; }
   };
   var renderSession = function () {
     var s = getSession();
@@ -166,13 +329,28 @@
     });
   });
 
-  /* ---------- Contact form ---------- */
+  /* ---------- Contact form (ITS-005: never accept an empty required field) ---------- */
   var contactForm = document.getElementById("contactForm");
   if (contactForm) {
     contactForm.addEventListener("submit", function (e) {
       e.preventDefault();
       var msg = contactForm.querySelector(".form-msg");
+      var bad = null;
+      contactForm.querySelectorAll("[required]").forEach(function (f) {
+        if (!bad && !String(f.value || "").trim()) bad = f;
+      });
+      if (bad) {
+        if (msg) {
+          msg.textContent = (bad.getAttribute("placeholder") || "This field") + " is required — please fill it in before sending.";
+          msg.style.color = "var(--red)";
+          msg.classList.add("show");
+          setTimeout(function () { msg.classList.remove("show"); }, 6000);
+        }
+        try { bad.focus(); } catch (err) {}
+        return;
+      }
       if (msg) {
+        msg.style.color = "";
         msg.textContent = "Thank you! Your message has been sent — our team will reply within 24 hours.";
         contactForm.reset();
         msg.classList.add("show");

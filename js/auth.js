@@ -8,6 +8,11 @@
   var USERS_KEY = "stackly_users";
   var SESSION_KEY = "stackly_session";
 
+  /* Security module (SHA-256 / HMAC session signing) is defined in main.js,
+     which loads first. If it is missing, fail secure: no readable session
+     and no credential operations are possible. */
+  var sec = window.StacklySec;
+
   var getUsers = function () {
     try {
       var v = JSON.parse(localStorage.getItem(USERS_KEY));
@@ -16,20 +21,44 @@
   };
   var saveUsers = function (list) { try { localStorage.setItem(USERS_KEY, JSON.stringify(list)); } catch (err) {} };
   var getSession = function () {
-    try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch (err) { return null; }
+    if (!sec || sec.ok === false) return null;
+    var s = sec.get();
+    if (!s) return null;
+    /* ITS-003: the signed session role must still match the stored account
+       record — reconcile the two and destroy anything inconsistent. */
+    var u = getUsers().filter(function (x) { return x.email === s.email; })[0];
+    if (!u || u.role !== s.role) { sec.kill(); return null; }
+    return s;
   };
-  var setSession = function (s) { try { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); } catch (err) {} };
-  var killSession = function () { try { localStorage.removeItem(SESSION_KEY); } catch (err) {} };
+  var setSession = function (s) { if (sec && sec.ok !== false) sec.set(s); };
+  var killSession = function () {
+    if (sec) sec.kill();
+    else { try { localStorage.removeItem(SESSION_KEY); } catch (err) {} }
+  };
 
-  /* Seed a demo admin account on first run (never let storage errors kill the page) */
+  /* Seed the pre-provisioned demo admin (ITS-001: admin accounts are created
+     by the app itself, never through the public signup form) and migrate any
+     legacy plaintext passwords to salted hashes (ITS-002). */
   (function seed() {
     try {
+      if (!sec || sec.ok === false) return;
       var users = getUsers();
+      var changed = false;
+      users.forEach(function (u) {
+        if (u.password !== undefined) {
+          if (!u.salt) u.salt = sec.randHex(16);
+          if (!u.pwHash) u.pwHash = sec.hashPw(String(u.password), u.salt);
+          delete u.password;
+          changed = true;
+        }
+      });
       var hasAdmin = users.some(function (u) { return u.role === "admin"; });
       if (!hasAdmin) {
-        users.push({ name: "Stackly Admin", email: "admin@stackly.com", password: "admin123", role: "admin" });
-        saveUsers(users);
+        var salt = sec.randHex(16);
+        users.push({ name: "Stackly Admin", email: "admin@stackly.com", salt: salt, pwHash: sec.hashPw("admin123", salt), role: "admin" });
+        changed = true;
       }
+      if (changed) saveUsers(users);
     } catch (err) {}
   })();
 
@@ -72,10 +101,16 @@
     }
     loginForm.addEventListener("submit", function (e) {
       e.preventDefault();
+      if (!sec || sec.ok === false) {
+        showErr(loginForm, "Security module unavailable — refresh the page and try again.");
+        return;
+      }
       var email = loginForm.querySelector("[name=email]").value.trim().toLowerCase();
       var pass = loginForm.querySelector("[name=password]").value;
-      var user = getUsers().filter(function (u) { return u.email === email && u.password === pass; })[0];
-      if (!user) { showErr(loginForm, "Invalid email or password. Please try again."); return; }
+      var user = getUsers().filter(function (u) { return u.email === email; })[0];
+      if (!user || !user.pwHash || user.pwHash !== sec.hashPw(pass, user.salt || "")) {
+        showErr(loginForm, "Invalid email or password. Please try again."); return;
+      }
       if (user.role !== activeRole) {
         showErr(loginForm, "This account is registered as \"" + user.role + "\" — select the correct role to continue.");
         return;
@@ -90,6 +125,10 @@
   if (signupForm) {
     signupForm.addEventListener("submit", function (e) {
       e.preventDefault();
+      if (!sec || sec.ok === false) {
+        showErr(signupForm, "Security module unavailable — refresh the page and try again.");
+        return;
+      }
       var name = signupForm.querySelector("[name=name]").value.trim();
       var email = signupForm.querySelector("[name=email]").value.trim().toLowerCase();
       var pass = signupForm.querySelector("[name=password]").value;
@@ -103,10 +142,13 @@
         showErr(signupForm, "An account with this email already exists. Please log in.");
         return;
       }
-      users.push({ name: name, email: email, password: pass, role: activeRole });
+      /* ITS-001: public registration always creates a Customer account —
+         admin roles are only ever provisioned by the app itself (seed). */
+      var salt = sec.randHex(16);
+      users.push({ name: name, email: email, salt: salt, pwHash: sec.hashPw(pass, salt), role: "user" });
       saveUsers(users);
-      setSession({ name: name, email: email, role: activeRole });
-      location.href = activeRole === "admin" ? "admin.html" : "dashboard.html";
+      setSession({ name: name, email: email, role: "user" });
+      location.href = "dashboard.html";
     });
   }
 
@@ -220,16 +262,51 @@
     if (passwordForm) {
       passwordForm.addEventListener("submit", function (e) {
         e.preventDefault();
+        if (!sec || sec.ok === false) {
+          showErr(passwordForm, "Security module unavailable — refresh the page and try again.");
+          passwordForm.querySelector(".auth-err").style.color = "var(--red)";
+          return;
+        }
         var cur = passwordForm.querySelector("[name=current]").value;
         var next = passwordForm.querySelector("[name=next]").value;
         var me = getUsers().filter(function (u) { return u.email === s.email; })[0];
-        if (me && me.password !== cur) { showErr(passwordForm, "Current password is incorrect."); passwordForm.querySelector(".auth-err").style.color = "var(--red)"; return; }
+        if (!me || !me.pwHash || me.pwHash !== sec.hashPw(cur, me.salt || "")) { showErr(passwordForm, "Current password is incorrect."); passwordForm.querySelector(".auth-err").style.color = "var(--red)"; return; }
         if (next.length < 6) { showErr(passwordForm, "New password must be at least 6 characters."); passwordForm.querySelector(".auth-err").style.color = "var(--red)"; return; }
-        getUsers().forEach(function (u) { if (u.email === s.email) u.password = next; });
-        saveUsers(getUsers());
+        var newSalt = sec.randHex(16);
+        var list = getUsers();
+        list.forEach(function (u) { if (u.email === s.email) { u.salt = newSalt; u.pwHash = sec.hashPw(next, newSalt); } });
+        saveUsers(list);
         showErr(passwordForm, "Password updated successfully ✓");
         passwordForm.querySelector(".auth-err").style.color = "#2e7d32";
         passwordForm.reset();
+      });
+    }
+
+    /* ---------- Saved addresses — really persisted (ITS-004 fix) ---------- */
+    var ADDR_KEY = "stackly_addresses";
+    var getAddrs = function () {
+      try { var v = JSON.parse(localStorage.getItem(ADDR_KEY)); return Array.isArray(v) ? v : []; } catch (err) { return []; }
+    };
+    var saveAddrs = function (list) {
+      try { localStorage.setItem(ADDR_KEY, JSON.stringify(list)); return true; } catch (err) { return false; }
+    };
+    var appendAddrCard = function (list, label, addr, badge) {
+      var card = document.createElement("div");
+      card.className = "addr-card";
+      var b = document.createElement("b");
+      b.textContent = label;
+      var p = document.createElement("p");
+      p.textContent = addr;
+      var span = document.createElement("span");
+      span.className = "status pending";
+      span.textContent = badge;
+      card.appendChild(b); card.appendChild(p); card.appendChild(span);
+      list.appendChild(card);
+    };
+    var addrPanel = document.querySelector(".dash-view[data-dash-view='addresses'] .dash-panel");
+    if (addrPanel) {
+      getAddrs().forEach(function (a) {
+        if (a && a.label && a.addr) appendAddrCard(addrPanel, a.label, a.addr, "Saved");
       });
     }
 
@@ -239,23 +316,19 @@
         e.preventDefault();
         var label = addrForm.querySelector("[name=label]").value.trim();
         var addr = addrForm.querySelector("[name=address]").value.trim();
-        if (!label || !addr) { showErr(addrForm, "Please fill in both fields."); addrForm.querySelector(".auth-err").style.color = "var(--red)"; return; }
-        var list = addrForm.closest(".dash-panel").previousElementSibling;
-        if (list && list.classList.contains("dash-panel")) {
-          var card = document.createElement("div");
-          card.className = "addr-card";
-          var b = document.createElement("b");
-          b.textContent = label;
-          var p = document.createElement("p");
-          p.textContent = addr;
-          var span = document.createElement("span");
-          span.className = "status pending";
-          span.textContent = "New";
-          card.appendChild(b); card.appendChild(p); card.appendChild(span);
-          list.appendChild(card);
+        var errBox = addrForm.querySelector(".auth-err");
+        if (!label || !addr) { showErr(addrForm, "Please fill in both fields."); if (errBox) errBox.style.color = "var(--red)"; return; }
+        var stored = getAddrs();
+        stored.push({ label: label, addr: addr });
+        if (!saveAddrs(stored)) {
+          showErr(addrForm, "Could not save the address — browser storage is unavailable.");
+          if (errBox) errBox.style.color = "var(--red)";
+          return;
         }
+        var list = addrForm.closest(".dash-panel").previousElementSibling;
+        if (list && list.classList.contains("dash-panel")) appendAddrCard(list, label, addr, "New");
         showErr(addrForm, "Address saved ✓");
-        addrForm.querySelector(".auth-err").style.color = "#2e7d32";
+        if (errBox) errBox.style.color = "#2e7d32";
         addrForm.reset();
       });
     }

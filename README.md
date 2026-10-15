@@ -59,7 +59,16 @@ Left sidebar + right content, switched client-side:
 Storage keys: `stackly_users`, `stackly_session`, `stackly_cart`.
 
 - Roles: **customer (`user`)** and **admin (`admin`)**
-- Login / signup include a **role pill** selector — credentials are checked against the chosen role
+- **Login** includes the **role pill** selector — credentials are checked against the chosen role.
+  **Signup has no role selector**: public registration always creates a `user` (Customer)
+  account; the only admin account is provisioned by the app itself on first run.
+- **Passwords are never stored in readable form.** Each account holds a random `salt` plus a
+  salted SHA-256 `pwHash` (64 hex chars) — no `password` field ever touches localStorage.
+  Legacy plaintext records are migrated to hashes automatically on page load.
+- **Sessions are HMAC-signed and expire after 7 days.** `stackly_session` carries a `sig`
+  over its fields; editing any field (e.g. `role`) invalidates the signature, so the session
+  is destroyed and the visitor is bounced to `login.html`. The guard additionally reconciles
+  the session role against the stored account record.
 - Guards: `data-guard="user"` (dashboard) and `data-guard="admin"` (admin panel).
   Logged-out visitors bounce to `login.html`; the wrong role is bounced to their own dashboard.
 - `data-logout` clears the session and returns to the **home page**
@@ -74,6 +83,20 @@ Storage keys: `stackly_users`, `stackly_session`, `stackly_cart`.
 |------|-------|----------|
 | Admin | `admin@stackly.com` | `admin123` |
 | Customer | sign up at `signup.html` | choose your own |
+
+## QA bug fixes (tester report ITS-001 → ITS-005)
+
+| ID | Reported bug | Fix |
+|----|--------------|-----|
+| ITS-001 | Public signup allowed the **Admin** role | Admin pill removed from `signup.html`; the signup handler always stores `role: "user"`. Admin accounts exist only via app provisioning (seeded demo admin) |
+| ITS-002 | Passwords stored **plaintext** in `stackly_users` | Salted SHA-256 `pwHash` replaces `password` (seed, signup, login, change-password all hash-aware); existing plaintext records are migrated on load; `password` property is deleted |
+| ITS-003 | Editing `stackly_session.role` **bypassed** the admin guard | Sessions are HMAC-SHA256-signed with a 7-day expiry; any tampering destroys the session and redirects to login; guards also reconcile the role with the account record |
+| ITS-004 | Dashboard **Save** reported success without saving | "Save Address" now persists to `stackly_addresses` and re-renders saved cards after reload; failure to store shows an error instead of a false ✓. (No Download/Renew actions exist in this build.) |
+| ITS-005 | Contact form accepted an **empty message** | `novalidate` removed — native validation rejects empty required fields and focuses the offending field; a JS fallback names the field in the form message (`Your Message is required…`) |
+
+> Note: this is a **static HTML/CSS/JS** build — credentials and role checks live client-side
+> (hashed + signed, but still client-side). A production deployment must additionally enforce
+> authentication and authorization on a trusted server.
 
 ## Shop → Cart
 
